@@ -106,6 +106,39 @@ class ScriptAPI(private val bot: Player) {
     }
 
     /**
+     * Gets the nearest node with matching id.
+     * @param ids the id to look for
+     * @param object whether or not the node we are looking for is an object.
+     * @return the closest node with matching id or null.
+     * @author Omgftw
+     */
+    fun getNearestNode(ids: Collection<Int>, `object`: Boolean): Node? {
+        if (`object`) {
+            var entity: Node? = null
+            var minDistance = Double.MAX_VALUE
+            for (objects in RegionManager.forId(bot.location.regionId).planes[bot.location.z].objects) {
+                for(e in objects) {
+                    if (e != null && e.id in ids && distance(bot, e) < minDistance && !Pathfinder.find(bot, e).isMoveNear && e.isActive) {
+                        entity = e
+                        minDistance = distance(bot, e)
+                    }
+                }
+            }
+            return if(entity == null) null else entity as GameObject
+        } else {
+            var entity: Node? = null
+            var minDistance = Double.MAX_VALUE
+            for (e in RegionManager.forId(bot.location.regionId).planes[bot.location.z].entities) {
+                if (e != null && e.id in ids && distance(bot, e) < minDistance && !Pathfinder.find(bot, e).isMoveNear) {
+                    entity = e
+                    minDistance = distance(bot, e)
+                }
+            }
+            return entity
+        }
+    }
+
+    /**
      * Gets the nearest node with a matching name.
      * @param name the name to look for.
      * @param object whether or not the node we are looking for is an object.
