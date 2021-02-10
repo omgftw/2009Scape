@@ -1,9 +1,9 @@
 package plugin.ai.general.scriptrepository
 
+import core.game.node.entity.skill.Skills
+import core.game.node.entity.skill.gather.SkillingResource
 import core.game.node.item.Item
 import core.tools.Items
-import plugin.skill.Skills
-import plugin.skill.gather.SkillingResource
 
 @PlayerCompatible
 @ScriptName("Generic Non-banking Iron Miner")
