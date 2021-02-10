@@ -565,11 +565,11 @@ class ScriptAPI(private val bot: Player) {
      * @author Ceikry
      */
     fun bankItem(item: Int){
-        class BankingPulse() : Pulse(20){
+        class BankingPulse() : Pulse(10){
             override fun pulse(): Boolean {
-                val logs = bot.inventory.getAmount(item)
-                bot.inventory.remove(Item(item, logs))
-                bot.bank.add(Item(item, logs))
+                val count = bot.inventory.getAmount(item)
+                bot.inventory.remove(Item(item, count))
+                bot.bank.add(Item(item, count))
                 return true
             }
         }
