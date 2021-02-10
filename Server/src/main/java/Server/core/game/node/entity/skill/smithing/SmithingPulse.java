@@ -91,7 +91,7 @@ public class SmithingPulse extends SkillPulse<Item> {
             return false;
         }
         player.getInventory().remove(new Item(bar.getBarType().getBarType(), bar.getSmithingType().getRequired()));
-        final Item item = new Item(node.getId(), bar.getSmithingType().getProductAmount());
+        final Item item = new Item(bar.getProduct(), bar.getSmithingType().getProductAmount());
         player.getInventory().add(item);
         player.getSkills().addExperience(Skills.SMITHING, bar.getBarType().getExperience() * bar.getSmithingType().getRequired(), true);
         String message = StringUtils.isPlusN(ItemDefinition.forId(bar.getProduct()).getName().toLowerCase()) ? "an" : "a";
