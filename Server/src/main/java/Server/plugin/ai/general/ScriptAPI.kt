@@ -200,12 +200,51 @@ class ScriptAPI(private val bot: Player) {
     }
 
     /**
+     * Gets the nearest ground item with matching ID from the list in AIRepository.
+     * @param ids the ids of the ground items we are looking for.
+     * @return the nearest GroundItem with a matching a collection of IDs
+     * @author Omgftw
+     */
+    private fun getNearestGroundItem(ids: Collection<Int>): GroundItem? {
+        var distance = 11.0
+        var closest: GroundItem? = null
+        if(AIRepository.getItems(bot) != null) {
+            for (item in AIRepository.getItems(bot)!!.filter { it.distance(bot.location) < 10 }) {
+                if (item.id in ids) {
+                    //distance = item.distance(bot.location)
+                    closest = item
+                }
+            }
+            if (!GroundItemManager.getItems().contains(closest)) AIRepository.getItems(bot)?.remove(closest).also { return null }
+        } else {
+            val items: ArrayList<GroundItem>? = bot.getAttribute("botting:drops",null)
+            if(items != null){
+                for(item in items.filter { it.distance(bot.location) < 10 }){
+                    if(item.id in ids) return item.also { items.remove(item); bot.setAttribute("botting:drops",items) }
+                }
+            }
+        }
+        return closest
+    }
+
+    /**
      * Takes the nearest ground item with a matching id if it exists.
      * @param id the id to look for
      * @author Ceikry
      */
     fun takeNearestGroundItem(id: Int){
         val item = getNearestGroundItem(id)
+        if(item != null)
+            item.interaction?.handle(bot, item.interaction[2])
+    }
+
+    /**
+     * Takes the nearest ground item with a matching id if it exists.
+     * @param id the id to look for
+     * @author Omgftw
+     */
+    fun takeNearestGroundItem(ids: Collection<Int>){
+        val item = getNearestGroundItem(ids)
         if(item != null)
             item.interaction?.handle(bot, item.interaction[2])
     }
