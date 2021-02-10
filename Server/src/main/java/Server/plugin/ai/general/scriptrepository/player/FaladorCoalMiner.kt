@@ -1,5 +1,6 @@
-package plugin.ai.general.scriptrepository
+package plugin.ai.general.scriptrepository.player
 
+import core.game.content.global.action.PickupHandler
 import core.game.interaction.DestinationFlag
 import core.game.interaction.MovementPulse
 import core.game.node.Node
@@ -9,8 +10,14 @@ import core.tools.Items
 import plugin.ai.general.ScriptAPI
 import plugin.ai.skillingbot.SkillingBotAssembler
 import core.game.node.entity.skill.Skills
+import core.game.node.item.GroundItemManager
+import plugin.ai.general.scriptrepository.*
 
-class CoalMiner() : Script() {
+@PlayerCompatible
+@ScriptName("Falador Coal Miner")
+@ScriptDescription("Start in Falador East Bank with a pick equipped","or in your inventory.")
+@ScriptIdentifier("fally_coal")
+class FaladorCoalMiner() : Script() {
     var state = State.INIT
     var ladderSwitch = false
 
@@ -35,16 +42,40 @@ class CoalMiner() : Script() {
             }
 
             State.MINING -> {
-                if(bot.inventory.freeSlots() == 0){
-                    state = State.TO_BANK
-                }
-                if(!mine.insideBorder(bot)){
-                    scriptAPI.walkTo(mine.randomLoc)
+                // Handle pickaxe head event
+                if (bot.equipment.contains(466, 1) || bot.inventory.contains(466, 1)) {
+                    println("missing pickaxe head")
+                    val item = GroundItemManager.getItems().find { it.droppedBy(bot) && it.id in arrayOf(480) }
+                    if (item != null) {
+                        PickupHandler.take(bot, item)
+                        if (bot.inventory.contains(480, 1) && bot.inventory.contains(466, 1)) {
+                            bot.inventory.remove(Item(480, 1))
+                            bot.inventory.remove(Item(466, 1))
+                            bot.inventory.add(Item(1265, 1))
+                        } else if (bot.inventory.contains(480, 1) && bot.equipment.contains(466, 1)) {
+                            val item = bot.equipment.getItem(Item(466, 1))
+                            val slot = item.slot
+                            bot.equipment.remove(item)
+                            bot.inventory.remove(Item(480, 1))
+                            bot.equipment.add(Item(1265, 1), slot, false, false)
+                        }
+                    }
+
+//                    scriptAPI.takeNearestGroundItem(listOf(
+//                        480, 481, 482, 483, 484, 485, 486, 487, 488, 498, 490, 491
+//                    ))
                 } else {
-                    val rock = scriptAPI.getNearestNode("rocks",true)
-                    rock?.interaction?.handle(bot,rock.interaction[0])
+                    if (bot.inventory.freeSlots() == 0) {
+                        state = State.TO_BANK
+                    }
+                    if (!mine.insideBorder(bot)) {
+                        scriptAPI.walkTo(mine.randomLoc)
+                    } else {
+                        val rock = scriptAPI.getNearestNode("rocks", true)
+                        rock?.interaction?.handle(bot, rock.interaction[0])
+                    }
+                    overlay!!.setAmount(bot.inventory.getAmount(Items.COAL_453) + coalAmount)
                 }
-                overlay!!.setAmount(bot.inventory.getAmount(Items.COAL_453) + coalAmount)
             }
 
             State.TO_BANK -> {
@@ -124,7 +155,7 @@ class CoalMiner() : Script() {
     }
 
     override fun newInstance(): Script {
-        val script = CoalMiner()
+        val script = FaladorCoalMiner()
         script.bot = SkillingBotAssembler().produce(SkillingBotAssembler.Wealth.POOR,bot.startLocation)
         return script
     }
