@@ -24,14 +24,14 @@ import core.game.world.update.flag.context.Graphics
 import core.tools.Items
 import core.tools.RandomFunction
 import plugin.ai.AIRepository
-import plugin.consumable.Consumable
-import plugin.consumable.Consumables
-import plugin.consumable.Food
-import plugin.consumable.effects.HealingEffect
-import plugin.ge.GrandExchangeOffer
-import plugin.ge.OfferManager
-import plugin.skill.Skills
-import plugin.stringtools.colorize
+import core.game.content.consumable.Consumable
+import core.game.content.consumable.Consumables
+import core.game.content.consumable.Food
+import core.game.content.consumable.effects.HealingEffect
+import core.game.ge.GrandExchangeOffer
+import core.game.ge.OfferManager
+import core.game.node.entity.skill.Skills
+import core.tools.stringtools.colorize
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -382,7 +382,7 @@ class ScriptAPI(private val bot: Player) {
                     actualId = Item(id).noteChange
                 }
                 val canSell = OfferManager.addBotOffer(actualId, itemAmt)
-                if (canSell) {
+                if (canSell && saleIsBigNews(actualId, itemAmt)) {
                     SystemLogger.log("Offered $itemAmt")
                     Repository.sendNews("2009Scape just offered " + itemAmt + " " + ItemDefinition.forId(actualId).name.toLowerCase() + " on the GE.")
                 }
@@ -415,7 +415,7 @@ class ScriptAPI(private val bot: Player) {
                         actualId = Item(actualId).noteChange
                     }
                     val canSell = OfferManager.addBotOffer(actualId, itemAmt)
-                    if (canSell) {
+                    if (canSell && saleIsBigNews(actualId, itemAmt)) {
                         Repository.sendNews("2009Scape just offered " + itemAmt + " " + ItemDefinition.forId(actualId).name.toLowerCase() + " on the GE.")
                     }
                     bot.bank.remove(item)
@@ -444,7 +444,7 @@ class ScriptAPI(private val bot: Player) {
                         actualId = Item(actualId).noteChange
                     }
                     val canSell = OfferManager.addBotOffer(actualId, itemAmt)
-                    if (canSell) {
+                    if (canSell && saleIsBigNews(actualId, itemAmt)) {
                         Repository.sendNews("2009Scape just offered " + itemAmt + " " + ItemDefinition.forId(actualId).name.toLowerCase() + " on the GE.")
                     }
                     bot.bank.remove(item)
@@ -454,6 +454,17 @@ class ScriptAPI(private val bot: Player) {
             }
         }
         bot.pulseManager.run(toCounterPulseAll())
+    }
+
+    /**
+     * Function to determine whether or not to bother everyone on the server
+     * with the big news that a bot is selling something to the GE, based on item value
+     * @param itemID
+     * @param amount
+     * @author Gexja
+     */
+    fun saleIsBigNews(itemID: Int, amount: Int): Boolean {
+        return ItemDefinition.forId(itemID).getAlchemyValue(true) * amount >= 500
     }
 
     /**
