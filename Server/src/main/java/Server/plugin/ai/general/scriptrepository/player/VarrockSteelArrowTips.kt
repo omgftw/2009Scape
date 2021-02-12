@@ -48,8 +48,9 @@ class VarrockSteelArrowTips : Script() {
 
                             val arrowTips = Items.STEEL_ARROWTIPS_41
                             val arrowTipsCount = bot.inventory.getAmount(arrowTips)
-                            bot.inventory.remove(Item(arrowTips, arrowTipsCount))
-                            bot.bank.add(Item(arrowTips, arrowTipsCount))
+                            scriptAPI.bankItem(arrowTips)
+//                            bot.inventory.remove(Item(arrowTips, arrowTipsCount))
+//                            bot.bank.add(Item(arrowTips, arrowTipsCount))
 
                             val bar = Items.STEEL_BAR_2353
                             val barCount = bot.bank.getAmount(bar)
@@ -61,10 +62,11 @@ class VarrockSteelArrowTips : Script() {
                                 bot.sendMessage(colorize("%ROut of Steel Bars. Stopping script..."))
                                 return true
                             }
-                            val capacity = bot.inventory.capacity() - bot.inventory.itemCount()
-                            val withdrawAmount = if (barCount > capacity) capacity else barCount
-                            bot.bank.remove(Item(bar, withdrawAmount))
-                            bot.inventory.add(Item(bar, withdrawAmount))
+//                            val capacity = bot.inventory.capacity() - bot.inventory.itemCount()
+//                            val withdrawAmount = if (barCount > capacity) capacity else barCount
+//                            bot.bank.remove(Item(bar, withdrawAmount))
+//                            bot.inventory.add(Item(bar, withdrawAmount))
+                            scriptAPI.withdraw(bar, bot.inventory.capacity())
 
                             state = State.SMITHING
                             return true
@@ -75,16 +77,17 @@ class VarrockSteelArrowTips : Script() {
     }
 
     override fun newInstance(): Script {
-        val script = VarrockSteelArrowTips()
-        script.bot = SkillingBotAssembler().produce(SkillingBotAssembler.Wealth.RICH, Location.create(3189, 3436, 0))
-        return script
+        return this
+//        val script = VarrockSteelArrowTips()
+//        script.bot = SkillingBotAssembler().produce(SkillingBotAssembler.Wealth.RICH, Location.create(3189, 3436, 0))
+//        return script
     }
 
-    init {
-        skills[Skills.SMITHING] = RandomFunction.random(33,99)
-        inventory.add(Item(Items.HAMMER_2347))
-        inventory.add(Item(Items.STEEL_BAR_2353,27))
-    }
+//    init {
+//        skills[Skills.SMITHING] = RandomFunction.random(33,99)
+//        inventory.add(Item(Items.HAMMER_2347))
+//        inventory.add(Item(Items.STEEL_BAR_2353,27))
+//    }
 
     enum class State {
         SMITHING,
